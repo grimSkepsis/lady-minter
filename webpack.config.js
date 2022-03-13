@@ -3,7 +3,7 @@ const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  entry: "./src/ts/App.tsx",
+  entry: "./src/ts/index.tsx",
   devtool: "inline-source-map",
   mode: "development",
   output: {
@@ -23,8 +23,8 @@ module.exports = {
         use: "html-loader",
       },
       {
-        test: /\.scss$/,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        test: /\.less$/,
+        use: ["style-loader", "css-loader", "less-loader"],
       },
     ],
   },

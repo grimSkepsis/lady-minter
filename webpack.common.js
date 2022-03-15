@@ -53,20 +53,5 @@ module.exports = {
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
-    fallback: {
-      // fs: false,
-      // tls: false,
-      // net: false,
-      // path: false,
-      // zlib: false,
-      http: require.resolve("stream-http"),
-      https: require.resolve("https-browserify"),
-      stream: require.resolve("stream-browserify"),
-      crypto: require.resolve("crypto-browserify"),
-      assert: require.resolve("assert/"),
-      url: require.resolve("url/"),
-      os: require.resolve("os-browserify/browser"),
-      // "crypto-browserify": false, //if you want to use this module also don't forget npm i crypto-browserify
-    },
   },
 };

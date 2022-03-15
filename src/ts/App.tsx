@@ -15,7 +15,7 @@ export const App = () => {
     try {
       await activate(injected);
     } catch (ex) {
-      console.log(ex);
+      console.log("ERROR: ", ex);
     }
   }
 

@@ -1,3 +1,3 @@
 test("Renders Priority Label", () => {
-  expect("test").toBe("test");
+  expect("test").toBe("test2");
 });

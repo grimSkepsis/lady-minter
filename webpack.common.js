@@ -19,6 +19,10 @@ module.exports = {
         use: ["babel-loader", "ts-loader"],
       },
       {
+        test: /\.(png|jpg|jpeg|gif)$/i,
+        type: "asset/resource",
+      },
+      {
         test: /\.html$/,
         use: "html-loader",
       },
@@ -50,8 +54,23 @@ module.exports = {
     new HTMLWebpackPlugin({
       template: "src/index.html",
     }),
+    new webpack.ProvidePlugin({
+      process: "process/browser",
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+    }),
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    fallback: {
+      http: require.resolve("stream-http"),
+      https: require.resolve("https-browserify"),
+      stream: require.resolve("stream-browserify"),
+      crypto: require.resolve("crypto-browserify"),
+      assert: require.resolve("assert/"),
+      url: require.resolve("url/"),
+      os: require.resolve("os-browserify/browser"),
+    },
   },
 };

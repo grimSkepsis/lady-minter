@@ -8,6 +8,7 @@ import mintImage from "../img/1.png";
 import LadyNFT from "../abi/LadyNFT.json";
 import Web3 from "web3";
 import { AbiItem } from "web3-utils";
+import { useEffect, useState } from "react";
 
 // declare var window: any;
 
@@ -17,6 +18,24 @@ export const injected = new InjectedConnector({
 export const App = () => {
   const { active, account, library, connector, activate, deactivate } =
     useWeb3React();
+  const eth = (window as any)?.ethereum;
+  const web3 = new Web3(eth ? eth : "");
+  const ladyNFT = new web3.eth.Contract(
+    LadyNFT.abi as AbiItem[],
+    "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+  );
+
+  const [balance, setBalance] = useState(0);
+
+  useEffect(() => {
+    void getBalance();
+  }, [account]);
+
+  async function getBalance(): Promise<void> {
+    const balance: number = await ladyNFT.methods.balanceOf(account).call();
+    console.log("BALANCE: ", balance);
+    setBalance(balance);
+  }
 
   async function connect(): Promise<void> {
     try {
@@ -41,17 +60,11 @@ export const App = () => {
     }
   }
 
-  function mint(): void {
-    let eth: any = (window as any)?.ethereum;
-    console.log(eth);
-    if (eth) {
-      const web3 = new Web3(eth);
-      //   const ladyNFT = new web3.eth.Contract(
-      //     LadyNFT.abi as AbiItem[],
-      //     "0x5fbdb2315678afecb367f032d93f642f64180aa3"
-      //   );
-      //   console.log(ladyNFT);
-      //   // const ladyNFT = new ethers
+  async function mint(): Promise<void> {
+    try {
+      await ladyNFT.methods.mint().send({ value: 0, from: account });
+    } catch (e) {
+      alert(e);
     }
   }
 
@@ -78,6 +91,7 @@ export const App = () => {
             Mint
           </Button>
         </div>
+        <div>NFTs held {balance}</div>
       </Content>
       <Footer></Footer>
     </Layout>

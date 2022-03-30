@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 
 // declare var window: any;
 
+const IPFS_GATEWAY = "https://gateway.pinata.cloud/";
+
 export const injected = new InjectedConnector({
   supportedChainIds: [31337],
 });
@@ -26,6 +28,8 @@ export const App = () => {
   );
 
   const [balance, setBalance] = useState(0);
+  const [tokenUri, setTokenUri] = useState("");
+  const [nftImageURL, setNftImageURL] = useState("");
 
   useEffect(() => {
     void getBalance();
@@ -35,6 +39,19 @@ export const App = () => {
     const balance: number = await ladyNFT.methods.balanceOf(account).call();
     console.log("BALANCE: ", balance);
     setBalance(balance);
+
+    if (balance > 0) {
+      const uri: string = await ladyNFT.methods.tokenURI(balance).call();
+      setTokenUri(uri);
+      const res = await fetch(createIPFSRequestURL(uri));
+      const data = await res.json();
+      console.log("JSON: ", data);
+      setNftImageURL(createIPFSRequestURL(data.image as string));
+    }
+  }
+
+  function createIPFSRequestURL(uri: string): string {
+    return IPFS_GATEWAY + uri.replace("://", "/");
   }
 
   async function connect(): Promise<void> {
@@ -83,7 +100,7 @@ export const App = () => {
           </Button>
         </div>
       </Header>
-      <Content>
+      <Content style={{ overflow: "auto" }}>
         <div className={styles.mintWrapper}>
           <h1>Mint your NFT</h1>
           <img src={mintImage} alt="mint" />
@@ -92,6 +109,8 @@ export const App = () => {
           </Button>
         </div>
         <div>NFTs held {balance}</div>
+        <div>Token URI {tokenUri}</div>
+        {nftImageURL && <img src={nftImageURL} alt="Test" />}
       </Content>
       <Footer></Footer>
     </Layout>

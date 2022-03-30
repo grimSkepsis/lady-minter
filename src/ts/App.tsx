@@ -9,6 +9,7 @@ import LadyNFT from "../abi/LadyNFT.json";
 import Web3 from "web3";
 import { AbiItem } from "web3-utils";
 import { useEffect, useState } from "react";
+import { CONTRACT_ADDRESS } from "./util";
 
 // declare var window: any;
 
@@ -24,20 +25,68 @@ export const App = () => {
   const web3 = new Web3(eth ? eth : "");
   const ladyNFT = new web3.eth.Contract(
     LadyNFT.abi as AbiItem[],
-    "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+    CONTRACT_ADDRESS
   );
+
+  const [currWallet, setCurrWallet] = useState<string | undefined | null>();
 
   const [balance, setBalance] = useState(0);
   const [tokenUri, setTokenUri] = useState("");
   const [nftImageURL, setNftImageURL] = useState("");
 
   useEffect(() => {
-    void getBalance();
+    if (localStorage.getItem("userWallet") !== account && account) {
+      localStorage.setItem("userWallet", String(account));
+    }
+    setCurrWallet(account);
   }, [account]);
 
-  async function getBalance(): Promise<void> {
+  useEffect(() => {
+    if (currWallet) {
+      void getBalance(currWallet);
+    }
+  }, [currWallet]);
+
+  useEffect(() => {
+    console.log("User wallet is: ", localStorage.getItem("userWallet"));
+    if (localStorage.getItem("userWallet") !== "") {
+      setCurrWallet(localStorage.getItem("userWallet"));
+    }
+  }, []);
+
+  return (
+    <Layout>
+      <Header>
+        <div className={styles.headerContentWrapper}>
+          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["2"]}>
+            <Menu.Item key="1">Home</Menu.Item>
+            <Menu.Item key="2">About</Menu.Item>
+            <Menu.Item key="3">Roadmap</Menu.Item>
+          </Menu>
+
+          <Button onClick={toggleWalletConnection}>
+            {!active ? "Connect Wallet" : "Disconnect Wallet"}
+          </Button>
+        </div>
+      </Header>
+      <Content style={{ overflow: "auto" }}>
+        <div className={styles.mintWrapper}>
+          <h1>Mint your NFT</h1>
+          <img src={mintImage} alt="mint" />
+          <Button disabled={!active} onClick={mint}>
+            Mint
+          </Button>
+        </div>
+        <div>NFTs held {balance}</div>
+        <div>Token URI {tokenUri}</div>
+        {nftImageURL && <img src={nftImageURL} alt="Test" />}
+      </Content>
+      <Footer></Footer>
+    </Layout>
+  );
+
+  async function getBalance(account: string): Promise<void> {
     const balance: number = await ladyNFT.methods.balanceOf(account).call();
-    console.log("BALANCE: ", balance);
     setBalance(balance);
 
     if (balance > 0) {
@@ -45,7 +94,6 @@ export const App = () => {
       setTokenUri(uri);
       const res = await fetch(createIPFSRequestURL(uri));
       const data = await res.json();
-      console.log("JSON: ", data);
       setNftImageURL(createIPFSRequestURL(data.image as string));
     }
   }
@@ -84,35 +132,4 @@ export const App = () => {
       alert(e);
     }
   }
-
-  return (
-    <Layout>
-      <Header>
-        <div className={styles.headerContentWrapper}>
-          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["2"]}>
-            <Menu.Item key="1">Home</Menu.Item>
-            <Menu.Item key="2">About</Menu.Item>
-            <Menu.Item key="3">Roadmap</Menu.Item>
-          </Menu>
-
-          <Button onClick={toggleWalletConnection}>
-            {!active ? "Connect Wallet" : "Disconnect Wallet"}
-          </Button>
-        </div>
-      </Header>
-      <Content style={{ overflow: "auto" }}>
-        <div className={styles.mintWrapper}>
-          <h1>Mint your NFT</h1>
-          <img src={mintImage} alt="mint" />
-          <Button disabled={!active} onClick={mint}>
-            Mint
-          </Button>
-        </div>
-        <div>NFTs held {balance}</div>
-        <div>Token URI {tokenUri}</div>
-        {nftImageURL && <img src={nftImageURL} alt="Test" />}
-      </Content>
-      <Footer></Footer>
-    </Layout>
-  );
 };

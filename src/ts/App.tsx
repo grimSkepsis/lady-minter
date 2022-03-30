@@ -28,31 +28,29 @@ export const App = () => {
     CONTRACT_ADDRESS
   );
 
-  const [currWallet, setCurrWallet] = useState<string | undefined | null>();
-
   const [balance, setBalance] = useState(0);
   const [tokenUri, setTokenUri] = useState("");
   const [nftImageURL, setNftImageURL] = useState("");
 
   useEffect(() => {
-    if (localStorage.getItem("userWallet") !== account && account) {
-      localStorage.setItem("userWallet", String(account));
-    }
-    setCurrWallet(account);
-  }, [account]);
-
-  useEffect(() => {
-    if (currWallet) {
-      void getBalance(currWallet);
-    }
-  }, [currWallet]);
-
-  useEffect(() => {
-    console.log("User wallet is: ", localStorage.getItem("userWallet"));
-    if (localStorage.getItem("userWallet") !== "") {
-      setCurrWallet(localStorage.getItem("userWallet"));
+    if (localStorage.getItem("userSignedIn") === "true") {
+      void activate(injected);
     }
   }, []);
+
+  useEffect(() => {
+    if (active && localStorage.getItem("userSignedIn") !== "true") {
+      localStorage.setItem("userSignedIn", "true");
+    } else if (!active && localStorage.getItem("userSignedIn") === "true") {
+      localStorage.setItem("userSignedIn", "false");
+    }
+  }, [active]);
+
+  useEffect(() => {
+    if (account) {
+      void getBalance(account);
+    }
+  }, [account]);
 
   return (
     <Layout>
@@ -112,6 +110,9 @@ export const App = () => {
   function disconnect(): void {
     try {
       deactivate();
+      setNftImageURL("");
+      setBalance(0);
+      setTokenUri("");
     } catch (ex) {
       console.log(ex);
     }
